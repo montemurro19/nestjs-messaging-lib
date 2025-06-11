@@ -1,0 +1,53 @@
+{
+  "name": "nestjs-messaging-lib",
+  "version": "1.0.0",
+  "description": "A generic messaging abstraction library for NestJS that supports Kafka and RabbitMQ.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "nestjs",
+    "messaging",
+    "kafka",
+    "rabbitmq",
+    "queue",
+    "topic",
+    "microservices"
+  ],
+  "author": "Matheus Montemurro <montemurro.matheus@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/montemurro19/nestjs-messaging-lib.git"
+  },
+  "homepage": "https://github.com/montemurro19/nestjs-messaging-lib#readme",
+  "bugs": {
+    "url": "https://github.com/montemurro19/nestjs-messaging-lib/issues"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.3",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.1.3",
+    "amqplib": "^0.8.0",
+    "kafkajs": "^1.15.0"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.8.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.0.0",
+    "jest": "^27.0.0",
+    "ts-jest": "^27.0.0",
+    "typescript": "^4.5.0"
+  }
+}
