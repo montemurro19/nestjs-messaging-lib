@@ -28,7 +28,7 @@ export class MessagingModule {
           }
           return new KafkaProducerService(kafkaConnectionService);
         }
-        return new RabbitMQProducerService(rabbitMQConnectionService);
+        return new RabbitMQProducerService(rabbitMQConnectionService, config);
       },
       inject: [KafkaConnectionService, RabbitMQConnectionService],
     };
@@ -42,7 +42,8 @@ export class MessagingModule {
         if (config.transport === 'kafka') {
           return new KafkaConsumerService(kafkaConnectionService);
         }
-        return new RabbitMQConsumerService(rabbitMQConnectionService);
+        // Pass the 'config' from forRoot's scope
+        return new RabbitMQConsumerService(rabbitMQConnectionService, config);
       },
       inject: [KafkaConnectionService, RabbitMQConnectionService],
     };
@@ -90,7 +91,8 @@ export class MessagingModule {
           }
           return new KafkaProducerService(kafkaConnectionService);
         }
-        return new RabbitMQProducerService(rabbitMQConnectionService);
+        // Pass the injected 'config'
+        return new RabbitMQProducerService(rabbitMQConnectionService, config);
       },
       inject: [MESSAGING_MODULE_OPTIONS_TOKEN, KafkaConnectionService, RabbitMQConnectionService],
     };
@@ -105,7 +107,8 @@ export class MessagingModule {
         if (config.transport === 'kafka') {
           return new KafkaConsumerService(kafkaConnectionService);
         }
-        return new RabbitMQConsumerService(rabbitMQConnectionService);
+        // Pass the injected 'config'
+        return new RabbitMQConsumerService(rabbitMQConnectionService, config);
       },
       inject: [MESSAGING_MODULE_OPTIONS_TOKEN, KafkaConnectionService, RabbitMQConnectionService],
     };
