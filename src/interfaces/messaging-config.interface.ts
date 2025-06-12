@@ -7,7 +7,7 @@ export interface MessagingConfig {
       mechanism: string;
       username: string;
       password: string;
-    };
+    } | { mechanism: 'oauthbearer'; oauthBearer: () => Promise<{ value: string }> };
     ssl?: boolean;
   };
   rabbitmq?: {
