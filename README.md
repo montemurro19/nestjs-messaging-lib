@@ -64,6 +64,67 @@ import { MessagingModule } from 'nestjs-messaging-lib';
 export class AppModule {}
 ```
 
+### Using the MessagingService
+
+The `MessagingService` provides methods for producing and consuming messages.
+
+**Producing Messages**
+
+To produce a message, inject the `MessagingService` and call the `produceMessage` method:
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { MessagingService } from 'nestjs-messaging-lib';
+
+@Injectable()
+export class MyService {
+  constructor(private readonly messagingService: MessagingService) {}
+
+  async sendMessage() {
+    await this.messagingService.produceMessage('my-topic', { key: 'value' });
+  }
+}
+```
+
+**Consuming Messages**
+
+To consume messages, use the `consumeMessage` method. You'll typically do this in a service that implements a message handler.
+
+```typescript
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { MessagingService } from 'nestjs-messaging-lib';
+
+@Injectable()
+export class MyConsumerService implements OnModuleInit {
+  constructor(private readonly messagingService: MessagingService) {}
+
+  onModuleInit() {
+    this.messagingService.consumeMessage('my-topic', this.handleMessage.bind(this));
+  }
+
+  async handleMessage(message: any): Promise<void> {
+    console.log('Received message:', message);
+    // Process the message
+  }
+}
+```
+
+Alternatively, you can use the `@MessageHandler` decorator on a method within a class that is registered as a provider.
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { MessageHandler } from 'nestjs-messaging-lib';
+
+@Injectable()
+export class MyDecoratedConsumerService {
+  @MessageHandler('my-topic')
+  async handleMessage(message: any): Promise<void> {
+    console.log('Received message via decorator:', message);
+    // Process the message
+  }
+}
+```
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
