@@ -12,15 +12,12 @@ import { MESSAGING_MODULE_OPTIONS_TOKEN } from './constants';
 import { KafkaConnectionService } from './providers/kafka/kafka-connection.service';
 import { RabbitMQConnectionService } from './providers/rabbitmq/rabbitmq-connection.service';
 
-export const MESSAGE_PRODUCER_TOKEN = 'MessageProducer';
-export const MESSAGE_CONSUMER_TOKEN = 'MessageConsumer';
-
 @Global()
 @Module({})
 export class MessagingModule {
   static forRoot(config: MessagingConfig): DynamicModule {
     const producerProvider: Provider = {
-      provide: MESSAGE_PRODUCER_TOKEN,
+      provide: 'MessageProducer',
       useFactory: (
         kafkaConnectionService: KafkaConnectionService,
         rabbitMQConnectionService: RabbitMQConnectionService,
@@ -37,7 +34,7 @@ export class MessagingModule {
     };
 
     const consumerProvider: Provider = {
-      provide: MESSAGE_CONSUMER_TOKEN,
+      provide: 'MessageConsumer',
       useFactory: (
         kafkaConnectionService: KafkaConnectionService,
         rabbitMQConnectionService: RabbitMQConnectionService,
@@ -69,8 +66,8 @@ export class MessagingModule {
       ],
       exports: [
         MessagingService,
-        MESSAGE_PRODUCER_TOKEN,
-        MESSAGE_CONSUMER_TOKEN,
+        'MessageProducer',
+        'MessageConsumer',
       ],
     };
   }
@@ -81,7 +78,7 @@ export class MessagingModule {
     imports?: any[];
   }): DynamicModule {
     const producerProvider: Provider = {
-      provide: MESSAGE_PRODUCER_TOKEN,
+      provide: 'MessageProducer',
       useFactory: (
         config: MessagingConfig,
         kafkaConnectionService: KafkaConnectionService,
@@ -99,7 +96,7 @@ export class MessagingModule {
     };
 
     const consumerProvider: Provider = {
-      provide: MESSAGE_CONSUMER_TOKEN,
+      provide: 'MessageConsumer',
       useFactory: (
         config: MessagingConfig,
         kafkaConnectionService: KafkaConnectionService,
@@ -137,8 +134,8 @@ export class MessagingModule {
       ],
       exports: [
         MessagingService,
-        MESSAGE_PRODUCER_TOKEN,
-        MESSAGE_CONSUMER_TOKEN,
+        'MessageProducer',
+        'MessageConsumer',
       ],
     };
   }
