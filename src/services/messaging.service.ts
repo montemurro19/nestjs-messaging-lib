@@ -1,17 +1,16 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { MessageProducer } from '../interfaces/message-producer.interface';
 import { MessageConsumer } from '../interfaces/message-consumer.interface';
-import { MessagingConfig } from '../interfaces/messaging-config.interface';
 import { RetryService } from './retry.service';
 import { DeadLetterService } from './dead-letter.service';
 import { MonitoringService } from './monitoring.service';
-import { MESSAGE_PRODUCER_TOKEN, MESSAGE_CONSUMER_TOKEN } from '../messaging.module'; // Import tokens
+import { MESSAGE_PRODUCER_TOKEN, MESSAGE_CONSUMER_TOKEN } from '../constants/messaging.constants';
 
 @Injectable()
 export class MessagingService {
   constructor(
-    @Inject(MESSAGE_PRODUCER_TOKEN) private readonly producer: MessageProducer, // Use token
-    @Inject(MESSAGE_CONSUMER_TOKEN) private readonly consumer: MessageConsumer, // Use token
+    @Inject(MESSAGE_PRODUCER_TOKEN) private readonly producer: MessageProducer,
+    @Inject(MESSAGE_CONSUMER_TOKEN) private readonly consumer: MessageConsumer,
     private readonly retryService: RetryService,
     private readonly deadLetterService: DeadLetterService,
     private readonly monitoringService: MonitoringService,

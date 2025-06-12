@@ -1,5 +1,8 @@
 export const MESSAGING_MODULE_OPTIONS_TOKEN = 'MESSAGING_MODULE_OPTIONS_TOKEN';
 
+export const MESSAGE_PRODUCER_TOKEN = 'MessageProducer';
+export const MESSAGE_CONSUMER_TOKEN = 'MessageConsumer';
+
 export const MESSAGING_CONSTANTS = {
   DEFAULT_RETRY_ATTEMPTS: 3,
   DEFAULT_DEAD_LETTER_QUEUE: 'dead-letter-queue',
