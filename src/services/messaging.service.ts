@@ -5,12 +5,13 @@ import { MessagingConfig } from '../interfaces/messaging-config.interface';
 import { RetryService } from './retry.service';
 import { DeadLetterService } from './dead-letter.service';
 import { MonitoringService } from './monitoring.service';
+import { MESSAGE_PRODUCER_TOKEN, MESSAGE_CONSUMER_TOKEN } from '../messaging.module'; // Import tokens
 
 @Injectable()
 export class MessagingService {
   constructor(
-    @Inject('MessageProducer') private readonly producer: MessageProducer,
-    @Inject('MessageConsumer') private readonly consumer: MessageConsumer,
+    @Inject(MESSAGE_PRODUCER_TOKEN) private readonly producer: MessageProducer, // Use token
+    @Inject(MESSAGE_CONSUMER_TOKEN) private readonly consumer: MessageConsumer, // Use token
     private readonly retryService: RetryService,
     private readonly deadLetterService: DeadLetterService,
     private readonly monitoringService: MonitoringService,

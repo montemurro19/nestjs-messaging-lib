@@ -1,14 +1,15 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { Kafka, Consumer, EachMessagePayload } from 'kafkajs';
+import { Consumer, EachMessagePayload } from 'kafkajs';
 import { MessageConsumer } from '../../interfaces/message-consumer.interface';
+import { KafkaConnectionService } from './kafka-connection.service';
 
 @Injectable()
 export class KafkaConsumerService implements MessageConsumer, OnModuleInit, OnModuleDestroy {
   private consumer: Consumer;
   private messageHandler?: (message: any) => Promise<void>;
 
-  constructor(private readonly kafka: Kafka) {
-    this.consumer = this.kafka.consumer({ groupId: 'default-group' });
+  constructor(private readonly kafkaConnectionService: KafkaConnectionService) {
+    this.consumer = this.kafkaConnectionService.getConsumer();
   }
 
   async onModuleInit() {
