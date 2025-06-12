@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
+import { MESSAGING_MODULE_OPTIONS_TOKEN } from '../constants';
+import { MessagingConfig } from '../interfaces/messaging-config.interface';
 
 @Injectable()
 export class RetryService {
   private readonly maxRetries: number;
   private readonly retryDelay: number;
 
-  constructor(maxRetries: number = 5, retryDelay: number = 1000) {
-    this.maxRetries = maxRetries;
-    this.retryDelay = retryDelay;
+  constructor(@Inject(MESSAGING_MODULE_OPTIONS_TOKEN) config: MessagingConfig) {
+    this.maxRetries = config.retryAttempts ?? 5;
+    this.retryDelay = config.retryDelay ?? 1000;
   }
 
   async retryMessage(topic: string, message: any, error: Error): Promise<void> {

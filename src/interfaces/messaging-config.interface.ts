@@ -17,6 +17,7 @@ export interface MessagingConfig {
     password?: string;
   };
   retryAttempts?: number;
+  retryDelay?: number; // Added retryDelay
   deadLetterQueue?: string;
   monitoring?: {
     enabled: boolean;
