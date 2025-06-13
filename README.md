@@ -38,6 +38,32 @@ import { MessagingModule } from 'nestjs-messaging-lib';
   imports: [
     MessagingModule.forRoot({
       // Configuration options
+      transport: 'kafka', // or 'rabbitmq'
+      kafka: {
+        brokers: ['kafka-broker1:9092', 'kafka-broker2:9092'],
+        clientId: 'my-app',
+        // Optional SASL authentication
+        sasl: {
+          mechanism: 'plain', // or 'scram-sha-256', 'scram-sha-512', 'oauthbearer'
+          username: 'your-username',
+          password: 'your-password',
+        },
+        // Optional SSL
+        ssl: true,
+      },
+      // Example for RabbitMQ
+      // transport: 'rabbitmq',
+      // rabbitmq: {
+      //   uri: 'amqp://user:password@localhost:5672',
+      //   queue: 'my-queue',
+      // },
+      retryAttempts: 3,
+      retryDelay: 1000, // in milliseconds
+      deadLetterQueue: 'my-dead-letter-queue', // DLQ name for Kafka or RabbitMQ
+      monitoring: {
+        enabled: true,
+        endpoint: '/health/messaging',
+      },
     }),
   ],
 })
@@ -51,18 +77,70 @@ For asynchronous configuration, use `forRootAsync()`:
 ```typescript
 import { Module } from '@nestjs/common';
 import { MessagingModule } from 'nestjs-messaging-lib';
+import { ConfigModule, ConfigService } from '@nestjs/config'; // Example using ConfigService
 
 @Module({
   imports: [
     MessagingModule.forRootAsync({
-      useFactory: async () => ({
-        // Configuration options
+      imports: [ConfigModule], // Import any modules that provide dependencies for the factory
+      useFactory: async (configService: ConfigService) => ({
+        // Configuration options fetched from ConfigService or other async sources
+        transport: configService.get<'kafka' | 'rabbitmq'>('MESSAGING_TRANSPORT'),
+        kafka: {
+          brokers: configService.get<string[]>('KAFKA_BROKERS'),
+          clientId: configService.get<string>('KAFKA_CLIENT_ID'),
+          sasl: {
+            mechanism: configService.get<string>('KAFKA_SASL_MECHANISM'),
+            username: configService.get<string>('KAFKA_SASL_USERNAME'),
+            password: configService.get<string>('KAFKA_SASL_PASSWORD'),
+          },
+          ssl: configService.get<boolean>('KAFKA_SSL'),
+        },
+        // Example for RabbitMQ
+        // rabbitmq: {
+        //   uri: configService.get<string>('RABBITMQ_URI'),
+        //   queue: configService.get<string>('RABBITMQ_QUEUE'),
+        // },
+        retryAttempts: configService.get<number>('MESSAGING_RETRY_ATTEMPTS'),
+        retryDelay: configService.get<number>('MESSAGING_RETRY_DELAY'),
+        deadLetterQueue: configService.get<string>('MESSAGING_DEAD_LETTER_QUEUE'),
+        monitoring: {
+          enabled: configService.get<boolean>('MESSAGING_MONITORING_ENABLED'),
+          endpoint: configService.get<string>('MESSAGING_MONITORING_ENDPOINT'),
+        },
       }),
+      inject: [ConfigService], // Inject any dependencies required by the factory
     }),
   ],
 })
 export class AppModule {}
 ```
+
+### Configuration Options
+
+The following options are available when configuring the `MessagingModule`:
+
+*   `transport`: Specifies the messaging system to use. Either `'kafka'` or `'rabbitmq'`.
+*   `kafka`: Configuration specific to Kafka.
+    *   `brokers`: An array of Kafka broker addresses (e.g., `['localhost:9092']`).
+    *   `clientId`: A unique identifier for the Kafka client.
+    *   `sasl`: (Optional) SASL authentication configuration.
+        *   `mechanism`: SASL mechanism (e.g., `'plain'`, `'scram-sha-256'`, `'oauthbearer'`).
+        *   `username`: Username for SASL authentication.
+        *   `password`: Password for SASL authentication.
+        *   `oauthBearer`: For `'oauthbearer'` mechanism, a function that returns a Promise resolving to `{ value: string }` containing the OAuth token.
+    *   `ssl`: (Optional) Set to `true` to enable SSL connections.
+*   `rabbitmq`: Configuration specific to RabbitMQ.
+    *   `uri`: The RabbitMQ connection URI (e.g., `'amqp://user:password@localhost:5672'`).
+    *   `queue`: The default queue name to use.
+    *   `username`: (Optional) Username for RabbitMQ authentication (if not in URI).
+    *   `password`: (Optional) Password for RabbitMQ authentication (if not in URI).
+*   `retryAttempts`: (Optional) Number of times to retry message processing on failure. Defaults to `3`.
+*   `retryDelay`: (Optional) Delay in milliseconds between retry attempts. Defaults to `1000`.
+*   `deadLetterQueue`: (Optional) Name of the dead letter queue.
+*   `monitoring`: (Optional) Configuration for health checks and monitoring.
+    *   `enabled`: Set to `true` to enable monitoring.
+    *   `endpoint`: The endpoint for accessing health status (e.g., `'/health/messaging'`).
 
 ### Using the MessagingService
 

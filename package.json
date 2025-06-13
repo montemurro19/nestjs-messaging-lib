@@ -1,6 +1,6 @@
 {
   "name": "nestjs-messaging-lib",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "A generic messaging abstraction library for NestJS that supports Kafka and RabbitMQ.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
