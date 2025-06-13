@@ -38,32 +38,6 @@ import { MessagingModule } from 'nestjs-messaging-lib';
   imports: [
     MessagingModule.forRoot({
       // Configuration options
-      transport: 'kafka', // or 'rabbitmq'
-      kafka: {
-        brokers: ['kafka-broker1:9092', 'kafka-broker2:9092'],
-        clientId: 'my-app',
-        // Optional SASL authentication
-        sasl: {
-          mechanism: 'plain', // or 'scram-sha-256', 'scram-sha-512', 'oauthbearer'
-          username: 'your-username',
-          password: 'your-password',
-        },
-        // Optional SSL
-        ssl: true,
-      },
-      // Example for RabbitMQ
-      // transport: 'rabbitmq',
-      // rabbitmq: {
-      //   uri: 'amqp://user:password@localhost:5672',
-      //   queue: 'my-queue',
-      // },
-      retryAttempts: 3,
-      retryDelay: 1000, // in milliseconds
-      deadLetterQueue: 'my-dead-letter-queue', // DLQ name for Kafka or RabbitMQ
-      monitoring: {
-        enabled: true,
-        endpoint: '/health/messaging',
-      },
     }),
   ],
 })
@@ -82,34 +56,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config'; // Example using C
 @Module({
   imports: [
     MessagingModule.forRootAsync({
-      imports: [ConfigModule], // Import any modules that provide dependencies for the factory
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: async () => ({
         // Configuration options fetched from ConfigService or other async sources
-        transport: configService.get<'kafka' | 'rabbitmq'>('MESSAGING_TRANSPORT'),
-        kafka: {
-          brokers: configService.get<string[]>('KAFKA_BROKERS'),
-          clientId: configService.get<string>('KAFKA_CLIENT_ID'),
-          sasl: {
-            mechanism: configService.get<string>('KAFKA_SASL_MECHANISM'),
-            username: configService.get<string>('KAFKA_SASL_USERNAME'),
-            password: configService.get<string>('KAFKA_SASL_PASSWORD'),
-          },
-          ssl: configService.get<boolean>('KAFKA_SSL'),
-        },
-        // Example for RabbitMQ
-        // rabbitmq: {
-        //   uri: configService.get<string>('RABBITMQ_URI'),
-        //   queue: configService.get<string>('RABBITMQ_QUEUE'),
-        // },
-        retryAttempts: configService.get<number>('MESSAGING_RETRY_ATTEMPTS'),
-        retryDelay: configService.get<number>('MESSAGING_RETRY_DELAY'),
-        deadLetterQueue: configService.get<string>('MESSAGING_DEAD_LETTER_QUEUE'),
-        monitoring: {
-          enabled: configService.get<boolean>('MESSAGING_MONITORING_ENABLED'),
-          endpoint: configService.get<string>('MESSAGING_MONITORING_ENDPOINT'),
-        },
-      }),
-      inject: [ConfigService], // Inject any dependencies required by the factory
     }),
   ],
 })
