@@ -8,6 +8,7 @@ export class KafkaConnectionService implements OnModuleDestroy {
   private kafka: Kafka | null = null;
   private producerInstance: Producer | null = null;
   private consumerInstance: Consumer | null = null;
+  private connectPromise: Promise<void> | null = null;
   private readonly logger = new Logger(KafkaConnectionService.name);
 
   constructor(@Inject(MESSAGING_MODULE_OPTIONS_TOKEN) private readonly messagingConfig: MessagingConfig) {
@@ -49,8 +50,8 @@ export class KafkaConnectionService implements OnModuleDestroy {
         // Ensure groupId is valid, e.g., not empty if clientId can be empty
         const groupId = (this.messagingConfig.kafka.clientId || 'default-client') + '-group';
         this.consumerInstance = this.kafka.consumer({ groupId });
-        // Defer connection to onModuleInit or a specific connect call if preferred
-        // For now, let's attempt connection here and log errors.
+        // Start connecting early. Producer and consumer services await this same
+        // promise (via connect()) before using the client, so there is no race.
         this.connect().catch(err => this.logger.error('Failed to connect Kafka producer/consumer during constructor init:', err?.message));
       } catch (error: any) {
         this.logger.error(`Error initializing Kafka client: ${error?.message}`, error?.stack);
@@ -60,17 +61,32 @@ export class KafkaConnectionService implements OnModuleDestroy {
     }
   }
 
-  async connect(): Promise<void> {
+  /**
+   * Connects the producer and the consumer once. Concurrent and later calls share
+   * the same in-flight promise, so callers can always `await connect()` before
+   * using the client. If the connection fails, the next call tries again.
+   */
+  connect(): Promise<void> {
     if (this.messagingConfig.transport !== 'kafka' || !this.producerInstance || !this.consumerInstance) {
       if (this.messagingConfig.transport === 'kafka') {
         this.logger.warn('Kafka selected, but producer/consumer not initialized. Connect call skipped.');
       }
-      return;
+      return Promise.resolve();
     }
+    if (!this.connectPromise) {
+      this.connectPromise = this.doConnect(this.producerInstance, this.consumerInstance).catch(error => {
+        this.connectPromise = null;
+        throw error;
+      });
+    }
+    return this.connectPromise;
+  }
+
+  private async doConnect(producer: Producer, consumer: Consumer): Promise<void> {
     try {
       this.logger.log('Attempting to connect Kafka producer and consumer...');
-      await this.producerInstance.connect();
-      await this.consumerInstance.connect();
+      await producer.connect();
+      await consumer.connect();
       this.logger.log('Kafka producer and consumer connected successfully.');
     } catch (error: any) {
       this.logger.error(`Error connecting Kafka producer/consumer: ${error?.message}`, error?.stack);
@@ -82,6 +98,7 @@ export class KafkaConnectionService implements OnModuleDestroy {
     if (this.messagingConfig.transport !== 'kafka') {
       return;
     }
+    this.connectPromise = null;
     try {
       if (this.producerInstance && typeof this.producerInstance.disconnect === 'function') {
         await this.producerInstance.disconnect();

@@ -13,7 +13,7 @@ export class KafkaConsumerService implements MessageConsumer, OnModuleInit, OnMo
   }
 
   async onModuleInit() {
-    await this.consumer.connect();
+    await this.kafkaConnectionService.connect();
   }
 
   async onModuleDestroy() {
@@ -25,6 +25,8 @@ export class KafkaConsumerService implements MessageConsumer, OnModuleInit, OnMo
   }
 
   async subscribe(topic: string, groupId?: string): Promise<void> {
+    // kafkajs throws "Broker not connected" if subscribe runs before connect finishes.
+    await this.kafkaConnectionService.connect();
     await this.consumer.subscribe({ topic });
     
     await this.consumer.run({
