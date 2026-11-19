@@ -12,7 +12,7 @@ export class KafkaProducerService implements MessageProducer, OnModuleInit, OnMo
   }
 
   async onModuleInit() {
-    await this.producer.connect();
+    await this.kafkaConnectionService.connect();
   }
 
   async onModuleDestroy() {
@@ -24,6 +24,7 @@ export class KafkaProducerService implements MessageProducer, OnModuleInit, OnMo
   }
 
   async produce(topic: string, message: any): Promise<void> {
+    await this.kafkaConnectionService.connect();
     await this.producer.send({
       topic,
       messages: [

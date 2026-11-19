@@ -26,7 +26,8 @@ export class MessagingService {
   }
 
   async consumeMessage(topic: string, handler: (message: any) => Promise<void>): Promise<void> {
-    this.consumer.subscribe(topic);
+    // Register the handler before subscribing: messages delivered before it is set
+    // would be skipped (and, on Kafka, their offsets committed anyway).
     this.consumer.onMessage(async (message) => {
       try {
         await handler(message);
@@ -35,5 +36,8 @@ export class MessagingService {
         this.deadLetterService.handleFailedMessage(message, error as Error);
       }
     });
+    // Awaited so connection/subscription errors reach the caller instead of
+    // becoming unhandled rejections.
+    await this.consumer.subscribe(topic);
   }
 }
